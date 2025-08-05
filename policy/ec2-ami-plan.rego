@@ -5,7 +5,8 @@ import input as tfplan
 allowed_ami_ids = ["ami-12345678", "ami-87654321"]
 
 violations[address] {
-    resource := tfplan.resource_changes[address]
+    resource := tfplan.resource_changes[_]
+    address := resource.address
     resource.type == "aws_instance"
     action := resource.change.actions[_]
     action in ["create", "update"]
