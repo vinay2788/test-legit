@@ -7,10 +7,11 @@ allowed_ami_ids = {
 
 deny[msg] {
     some r
-    input.resources[r].type == "aws_instance"
+    res := input.values.root_module.resources[r]
+    res.type == "aws_instance"
 
     some i
-    ami := input.resources[r].instances[i].attributes.ami
+    ami := res.instances[i].attributes.ami
 
     not ami
     msg := "AMI ID must be specified."
@@ -18,10 +19,11 @@ deny[msg] {
 
 deny[msg] {
     some r
-    input.resources[r].type == "aws_instance"
+    res := input.values.root_module.resources[r]
+    res.type == "aws_instance"
 
     some i
-    ami := input.resources[r].instances[i].attributes.ami
+    ami := res.instances[i].attributes.ami
 
     not allowed_ami_ids[ami]
     msg := sprintf("AMI ID '%s' is not allowed.", [ami])
