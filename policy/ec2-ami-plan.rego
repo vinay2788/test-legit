@@ -1,22 +1,31 @@
-package terraform.analysis
+# A Rego custom rule to check AWS EC2 AMI IDs, for use with Regula
+# See our blog post for details: https://blog.fugue.co
 
-import input as tfplan
+package rules.approved_ami
 
-# only these AMIs are allowed
-allowed_ami_ids = ["ami-12345678", "ami-87654321"]
-
-# find any aws_instance create/update with a disallowed AMI
-violations[addr] {
-  resource := tfplan.resource_changes[_]
-  addr     := resource.address
-  resource.type == "aws_instance"
-  action   := resource.change.actions[_]
-  action in ["create", "update"]
-  ami_id   := resource.change.after.ami
-  not ami_id in allowed_ami_ids
+__rego__metadoc__ := {
+  "id": "CUSTOM_0002",
+  "title": "AWS EC2 instances must use approved AMIs",
+  "description": "Per company policy, EC2 instances may only use AMI IDs from a pre-approved list",
+  "custom": {
+    "controls": {
+      "CORPORATE-POLICY": [
+        "CORPORATE-POLICY_1.2"
+      ]
+    },
+    "severity": "High"
+  }
 }
 
-# authorization only passes if no violations
-authz {
-  count(violations) == 0
+resource_type = "aws_instance"
+
+approved_amis = {
+  # Ubuntu Server 20.04 LTS (HVM), SSD Volume Type
+  "ami-09e67e426f25ce0d7", # us-east-1
+  "ami-03d5c68bab01f3496" # us-west-2 
+}
+
+deny[msg] {
+  not approved_amis[input.ami]
+  msg = sprintf("%s is not an approved AMI ID", [input.ami])
 }
