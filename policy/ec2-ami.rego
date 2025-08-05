@@ -12,6 +12,6 @@ deny[msg] {
 
 deny[msg] {
     input.ami_id
-    not input.ami_id in allowed_ami_ids
+    not (input.ami_id in allowed_ami_ids)
     msg := sprintf("AMI ID '%s' is not allowed.", [input.ami_id])
 }
