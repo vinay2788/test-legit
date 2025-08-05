@@ -1,5 +1,6 @@
 package terraform.analysis
 
+# Allowed AMI IDs as a set
 allowed_ami_ids = {
     "ami-0123456789abcdef0",
     "ami-0fedcba9876543210"
@@ -12,6 +13,6 @@ deny[msg] {
 
 deny[msg] {
     input.ami_id
-    not (input.ami_id in allowed_ami_ids)
+    not allowed_ami_ids[input.ami_id]
     msg := sprintf("AMI ID '%s' is not allowed.", [input.ami_id])
 }
